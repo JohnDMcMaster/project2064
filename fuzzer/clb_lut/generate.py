@@ -9,10 +9,10 @@ def run():
     #clbs = dict([(k, random.randint(0xFFFF)) for k in gen_clbs()])
     clbs = {}
     metaf = open("design.txt", 'w')
-    metaf.write('clb,val')
+    metaf.write('clb,val\n')
     for clb in gen_clbs():
         val = random.randint(0x0000, 0xFFFF)
-        metaf.write('%s,0x%04X' % (clb, val))
+        metaf.write('%s,0x%04X\n' % (clb, val))
         clbs[clb] = val
 
     open('DESIGN.LCA', 'w').write(clb2lca(clbs))
