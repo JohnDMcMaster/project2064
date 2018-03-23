@@ -1,7 +1,5 @@
 '''
-Create a .bits file, a text equivilent representation of the bitstream
 Inspired by the .bits format from project x-ray
-
 Unlike 7 series though, there are a lot of 1's in unused logic
 '''
 
@@ -23,7 +21,7 @@ def main():
 
     parser = argparse.ArgumentParser(
         description=
-        'Dump bitstream info'
+        'Create a .bits file, a text equivalent representation of the bitstream'
     )
 
     parser.add_argument('--verbose', type=int, help='')

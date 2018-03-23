@@ -84,8 +84,7 @@ Endblk
     
 def make(clb):
     print 'Cleaning old output...'
-    subprocess.check_call("make clean", shell=True)
-    clbs = '0x%02X' % clb
+    clbs = '0x%04X' % clb
     print 'Generating LCA...'
     lca = clb2lca(clb)
     print 'Writing LCA...'
@@ -103,10 +102,12 @@ print
 print
 print 'Generating references...'
 # 4 variables => 16 bit memory required
-for clb in xrange(16):
+make(0x0000)
+for maski in xrange(16):
     print
     print
     print
-    print 'Genearting 0x%02X (%s)' % (clb, func(clb))
+    mask = 1 << maski
+    print 'Genearting 0x%04X (%s)' % (mask, func(mask))
     make(clb)
     
