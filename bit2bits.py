@@ -8,15 +8,15 @@ Unlike 7 series though, there are a lot of 1's in unused logic
 from xc2k import parser
 from xc2k import container
 
-def run(f, format):
-    p = parser.Parser(container.getbits(f, format))
+def run(fin, fout, format):
+    p = parser.Parser(container.getbits(fin, format))
 
     for framei, frame in enumerate(p.frames()):
         for biti, bit in enumerate(frame['payload']):
             # self.nframes =      {'xc2018': 196, 'xc2064': 160}[dev]
             # self.frame_bits =   {'xc2018': 87,  'xc2064': 71}[dev]
             if bit:
-                print '%02x_%02x' % (framei, biti)
+                fout.write('%02x_%02x\n' % (framei, biti))
 
 def main():
     import argparse
@@ -28,9 +28,10 @@ def main():
 
     parser.add_argument('--verbose', type=int, help='')
     parser.add_argument('--format', default='bit', help='One of: bin, bit, rom')
-    parser.add_argument('fin', help='Input file')
+    parser.add_argument('fin', nargs='?', default='/dev/stdin', help='Input file')
+    parser.add_argument('fout', nargs='?', default='/dev/stdout', help='Output file')
     args = parser.parse_args()
-    run(open(args.fin, 'r'), format=args.format)
+    run(open(args.fin, 'r'), open(args.fout, 'w'), format=args.format)
 
 if __name__ == '__main__':
     main()
