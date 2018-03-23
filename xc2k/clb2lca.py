@@ -1,6 +1,39 @@
 #!/usr/bin/env python
 
-def clb2lca(equate):
+def gen_clbs():
+    # "The format for CLB locations is two letters. The first letter indicates the row, the second letter indicates the column
+    for row in [chr(ord('A') + i) for i in xrange(8)]:
+        for col in [chr(ord('A') + i) for i in xrange(8)]:
+            yield row + col
+
+def canonical_sop_term(mask):
+    def f(id, set):
+        if set:
+            return id
+        else:
+            return '(~%s)' % id
+    if mask > 0xF:
+        raise ValueError('4 variable max of 0xF')
+    return f('A', mask & 1) + '*' + f('B', mask & 2) + '*' + f('C', mask & 4) + '*' + f('D', mask & 8)
+    
+def equate(clb):
+    # (~A*(~C*(~B*~D)))+((~A*(~C*(~B*D)))+((~A*(~C*(B*~D)))+((~A*(~C*(B*D)))+((~A*(C*(B*D)))+(A*(C*(B*D)))))))
+    # Do non-canonical SOP
+    print 'Generating for CLB 0x%04X' % clb
+    if clb == 0:
+        # Special case: make a contradiction
+        return '((~A)*A)'
+    ret = ''
+    for i in xrange(16):
+        mask = 1 << i
+        if clb & mask:
+            print 'Masked %d (bit position 0x%04X)' % (i, mask)
+            if len(ret):
+                ret += '+'
+            ret += canonical_sop_term(i)
+    return '(' + ret + ')'
+
+def clb2lca(clbs):
     out = ''
     out += '''
 ; LCA Design=SB Part=2064PC68 -- Blocks=120 Nets=92.
@@ -294,7 +327,7 @@ Nameblk AD P3NET
 Editblk AD
 Base F
 Config F:C Y:F X: Q: RES: SET: CLK:
-Equate F = ''' + equate('AD') + '''
+Equate F = ''' + equate(clbs['AD']) + '''
 Endblk
 Nameblk P3 P3OUT
 Editblk P3
@@ -305,7 +338,7 @@ Nameblk BD P3TEMPNET
 Editblk BD
 Base F
 Config F:A X:F Y: Q: RES: SET: CLK:
-Equate F = ''' + equate('BD') + '''
+Equate F = ''' + equate(clbs['BD']) + '''
 Endblk
 Nameblk P4 P4IN
 Editblk P4
@@ -316,7 +349,7 @@ Nameblk AC P5NET
 Editblk AC
 Base F
 Config F:C Y:F X: Q: RES: SET: CLK:
-Equate F = ''' + equate('AC') + '''
+Equate F = ''' + equate(clbs['AC']) + '''
 Endblk
 Nameblk P5 P5OUT
 Editblk P5
@@ -327,7 +360,7 @@ Nameblk BC P5TEMPNET
 Editblk BC
 Base F
 Config F:A X:F Y: Q: RES: SET: CLK:
-Equate F = ''' + equate('BC') + '''
+Equate F = ''' + equate(clbs['BC']) + '''
 Endblk
 Nameblk P6 P6IN
 Editblk P6
@@ -338,7 +371,7 @@ Nameblk AB P7NET
 Editblk AB
 Base F
 Config F:C Y:F X: Q: RES: SET: CLK:
-Equate F = ''' + equate('AB') + '''
+Equate F = ''' + equate(clbs['AB']) + '''
 Endblk
 Nameblk P7 P7OUT
 Editblk P7
@@ -349,7 +382,7 @@ Nameblk BB P7TEMPNET
 Editblk BB
 Base F
 Config F:A X:F Y: Q: RES: SET: CLK:
-Equate F = ''' + equate('BB') + '''
+Equate F = ''' + equate(clbs['BB']) + '''
 Endblk
 Nameblk P8 P8IN
 Editblk P8
@@ -360,7 +393,7 @@ Nameblk AA P9NET
 Editblk AA
 Base F
 Config F:C Y:F X: Q: RES: SET: CLK:
-Equate F = ''' + equate('AA') + '''
+Equate F = ''' + equate(clbs['AA']) + '''
 Endblk
 Nameblk P9 P9OUT
 Editblk P9
@@ -371,7 +404,7 @@ Nameblk BA P9TEMPNET
 Editblk BA
 Base F
 Config F:A X:F Y: Q: RES: SET: CLK:
-Equate F = ''' + equate('BA') + '''
+Equate F = ''' + equate(clbs['BA']) + '''
 Endblk
 Nameblk P11 P11IN
 Editblk P11
@@ -382,7 +415,7 @@ Nameblk CB P12NET
 Editblk CB
 Base F
 Config F:B Y:F X: Q: RES: SET: CLK:
-Equate F = ''' + equate('CB') + '''
+Equate F = ''' + equate(clbs['CB']) + '''
 Endblk
 Nameblk P12 P12OUT
 Editblk P12
@@ -393,7 +426,7 @@ Nameblk CA P12TEMPNET
 Editblk CA
 Base F
 Config F:A Y:F X: Q: RES: SET: CLK:
-Equate F = ''' + equate('CA') + '''
+Equate F = ''' + equate(clbs['CA']) + '''
 Endblk
 Nameblk P13 P13IN
 Editblk P13
@@ -404,7 +437,7 @@ Nameblk CD P14NET
 Editblk CD
 Base F
 Config F:B Y:F X: Q: RES: SET: CLK:
-Equate F = ''' + equate('CD') + '''
+Equate F = ''' + equate(clbs['CD']) + '''
 Endblk
 Nameblk P14 P14OUT
 Editblk P14
@@ -415,7 +448,7 @@ Nameblk CC P14TEMPNET
 Editblk CC
 Base F
 Config F:A Y:F X: Q: RES: SET: CLK:
-Equate F = ''' + equate('CC') + '''
+Equate F = ''' + equate(clbs['CC']) + '''
 Endblk
 Nameblk P15 P15IN
 Editblk P15
@@ -426,7 +459,7 @@ Nameblk DB P16NET
 Editblk DB
 Base F
 Config F:C Y:F X: Q: RES: SET: CLK:
-Equate F = ''' + equate('DB') + '''
+Equate F = ''' + equate(clbs['DB']) + '''
 Endblk
 Nameblk P16 P16OUT
 Editblk P16
@@ -437,7 +470,7 @@ Nameblk EB P16TEMPNET
 Editblk EB
 Base F
 Config F:C X:F Y: Q: RES: SET: CLK:
-Equate F = ''' + equate('EB') + '''
+Equate F = ''' + equate(clbs['EB']) + '''
 Endblk
 Nameblk P17 P17IN
 Editblk P17
@@ -448,7 +481,7 @@ Nameblk EA P19NET
 Editblk EA
 Base F
 Config F:A Y:F X: Q: RES: SET: CLK:
-Equate F = ''' + equate('EA') + '''
+Equate F = ''' + equate(clbs['EA']) + '''
 Endblk
 Nameblk P19 P19OUT
 Editblk P19
@@ -459,7 +492,7 @@ Nameblk DA P19TEMPNET
 Editblk DA
 Base F
 Config F:B X:F Y: Q: RES: SET: CLK:
-Equate F = ''' + equate('DA') + '''
+Equate F = ''' + equate(clbs['DA']) + '''
 Endblk
 Nameblk P20 P20IN
 Editblk P20
@@ -470,7 +503,7 @@ Nameblk DC P21NET
 Editblk DC
 Base F
 Config F:C X:F Y: Q: RES: SET: CLK:
-Equate F = ''' + equate('DC') + '''
+Equate F = ''' + equate(clbs['DC']) + '''
 Endblk
 Nameblk P21 P21OUT
 Editblk P21
@@ -481,7 +514,7 @@ Nameblk EC P21TEMPNET
 Editblk EC
 Base F
 Config F:C X:F Y: Q: RES: SET: CLK:
-Equate F = ''' + equate('EC') + '''
+Equate F = ''' + equate(clbs['EC']) + '''
 Endblk
 Nameblk P22 P22IN
 Editblk P22
@@ -492,7 +525,7 @@ Nameblk FB P23NET
 Editblk FB
 Base F
 Config F:B X:F Y: Q: RES: SET: CLK:
-Equate F = ''' + equate('FB') + '''
+Equate F = ''' + equate(clbs['FB']) + '''
 Endblk
 Nameblk P23 P23OUT
 Editblk P23
@@ -503,7 +536,7 @@ Nameblk FA P23TEMPNET
 Editblk FA
 Base F
 Config F:D Y:F X: Q: RES: SET: CLK:
-Equate F = ''' + equate('FA') + '''
+Equate F = ''' + equate(clbs['FA']) + '''
 Endblk
 Nameblk P24 P24IN
 Editblk P24
@@ -514,7 +547,7 @@ Nameblk GA P27NET
 Editblk GA
 Base F
 Config F:C Y:F X: Q: RES: SET: CLK:
-Equate F = ''' + equate('GA') + '''
+Equate F = ''' + equate(clbs['GA']) + '''
 Endblk
 Nameblk P27 P27OUT
 Editblk P27
@@ -525,7 +558,7 @@ Nameblk HA P27TEMPNET
 Editblk HA
 Base F
 Config F:B X:F Y: Q: RES: SET: CLK:
-Equate F = ''' + equate('HA') + '''
+Equate F = ''' + equate(clbs['HA']) + '''
 Endblk
 Nameblk P28 P28IN
 Editblk P28
@@ -536,7 +569,7 @@ Nameblk GB P29NET
 Editblk GB
 Base F
 Config F:C Y:F X: Q: RES: SET: CLK:
-Equate F = ''' + equate('GB') + '''
+Equate F = ''' + equate(clbs['GB']) + '''
 Endblk
 Nameblk P29 P29OUT
 Editblk P29
@@ -547,7 +580,7 @@ Nameblk HB P29TEMPNET
 Editblk HB
 Base F
 Config F:C X:F Y: Q: RES: SET: CLK:
-Equate F = ''' + equate('HB') + '''
+Equate F = ''' + equate(clbs['HB']) + '''
 Endblk
 Nameblk P30 P30IN
 Editblk P30
@@ -558,7 +591,7 @@ Nameblk FC P31NET
 Editblk FC
 Base F
 Config F:C Y:F X: Q: RES: SET: CLK:
-Equate F = ''' + equate('FC') + '''
+Equate F = ''' + equate(clbs['FC']) + '''
 Endblk
 Nameblk P31 P31OUT
 Editblk P31
@@ -569,7 +602,7 @@ Nameblk GC P31TEMPNET
 Editblk GC
 Base F
 Config F:C X:F Y: Q: RES: SET: CLK:
-Equate F = ''' + equate('GC') + '''
+Equate F = ''' + equate(clbs['GC']) + '''
 Endblk
 Nameblk P32 P32IN
 Editblk P32
@@ -580,7 +613,7 @@ Nameblk HC P33NET
 Editblk HC
 Base F
 Config F:D Y:F X: Q: RES: SET: CLK:
-Equate F = ''' + equate('HC') + '''
+Equate F = ''' + equate(clbs['HC']) + '''
 Endblk
 Nameblk P33 P33OUT
 Editblk P33
@@ -591,7 +624,7 @@ Nameblk HD P33TEMPNET
 Editblk HD
 Base F
 Config F:C Y:F X: Q: RES: SET: CLK:
-Equate F = ''' + equate('HD') + '''
+Equate F = ''' + equate(clbs['HD']) + '''
 Endblk
 Nameblk P34 P34IN
 Editblk P34
@@ -602,7 +635,7 @@ Nameblk FD P36NET
 Editblk FD
 Base F
 Config F:C X:F Y: Q: RES: SET: CLK:
-Equate F = ''' + equate('FD') + '''
+Equate F = ''' + equate(clbs['FD']) + '''
 Endblk
 Nameblk P36 P36OUT
 Editblk P36
@@ -613,7 +646,7 @@ Nameblk GD P36TEMPNET
 Editblk GD
 Base F
 Config F:D X:F Y: Q: RES: SET: CLK:
-Equate F = ''' + equate('GD') + '''
+Equate F = ''' + equate(clbs['GD']) + '''
 Endblk
 Nameblk P37 P37IN
 Editblk P37
@@ -624,7 +657,7 @@ Nameblk GE P38NET
 Editblk GE
 Base F
 Config F:C Y:F X: Q: RES: SET: CLK:
-Equate F = ''' + equate('GE') + '''
+Equate F = ''' + equate(clbs['GE']) + '''
 Endblk
 Nameblk P38 P38OUT
 Editblk P38
@@ -635,7 +668,7 @@ Nameblk HE P38TEMPNET
 Editblk HE
 Base F
 Config F:D X:F Y: Q: RES: SET: CLK:
-Equate F = ''' + equate('HE') + '''
+Equate F = ''' + equate(clbs['HE']) + '''
 Endblk
 Nameblk P39 P39IN
 Editblk P39
@@ -646,7 +679,7 @@ Nameblk GF P40NET
 Editblk GF
 Base F
 Config F:C Y:F X: Q: RES: SET: CLK:
-Equate F = ''' + equate('GF') + '''
+Equate F = ''' + equate(clbs['GF']) + '''
 Endblk
 Nameblk P40 P40OUT
 Editblk P40
@@ -657,7 +690,7 @@ Nameblk HF P40TEMPNET
 Editblk HF
 Base F
 Config F:D X:F Y: Q: RES: SET: CLK:
-Equate F = ''' + equate('HF') + '''
+Equate F = ''' + equate(clbs['HF']) + '''
 Endblk
 Nameblk P41 P41IN
 Editblk P41
@@ -668,7 +701,7 @@ Nameblk GG P42NET
 Editblk GG
 Base F
 Config F:C Y:F X: Q: RES: SET: CLK:
-Equate F = ''' + equate('GG') + '''
+Equate F = ''' + equate(clbs['GG']) + '''
 Endblk
 Nameblk P42 P42OUT
 Editblk P42
@@ -679,7 +712,7 @@ Nameblk HG P42TEMPNET
 Editblk HG
 Base F
 Config F:D X:F Y: Q: RES: SET: CLK:
-Equate F = ''' + equate('HG') + '''
+Equate F = ''' + equate(clbs['HG']) + '''
 Endblk
 Nameblk P43 P43IN
 Editblk P43
@@ -690,7 +723,7 @@ Nameblk GH P46NET
 Editblk GH
 Base F
 Config F:C X:F Y: Q: RES: SET: CLK:
-Equate F = ''' + equate('GH') + '''
+Equate F = ''' + equate(clbs['GH']) + '''
 Endblk
 Nameblk P46 P46OUT
 Editblk P46
@@ -701,7 +734,7 @@ Nameblk HH P46TEMPNET
 Editblk HH
 Base F
 Config F:D X:F Y: Q: RES: SET: CLK:
-Equate F = ''' + equate('HH') + '''
+Equate F = ''' + equate(clbs['HH']) + '''
 Endblk
 Nameblk P47 P47IN
 Editblk P47
@@ -712,7 +745,7 @@ Nameblk EH P48NET
 Editblk EH
 Base F
 Config F:C Y:F X: Q: RES: SET: CLK:
-Equate F = ''' + equate('EH') + '''
+Equate F = ''' + equate(clbs['EH']) + '''
 Endblk
 Nameblk P48 P48OUT
 Editblk P48
@@ -723,7 +756,7 @@ Nameblk FH P48TEMPNET
 Editblk FH
 Base F
 Config F:D X:F Y: Q: RES: SET: CLK:
-Equate F = ''' + equate('FH') + '''
+Equate F = ''' + equate(clbs['FH']) + '''
 Endblk
 Nameblk P49 P49IN
 Editblk P49
@@ -734,7 +767,7 @@ Nameblk FG P50NET
 Editblk FG
 Base F
 Config F:B Y:F X: Q: RES: SET: CLK:
-Equate F = ''' + equate('FG') + '''
+Equate F = ''' + equate(clbs['FG']) + '''
 Endblk
 Nameblk P50 P50OUT
 Editblk P50
@@ -745,13 +778,13 @@ Nameblk FE P50TEMP1NET
 Editblk FE
 Base F
 Config F:D Y:F X: Q: RES: SET: CLK:
-Equate F = ''' + equate('FE') + '''
+Equate F = ''' + equate(clbs['FE']) + '''
 Endblk
 Nameblk FF P50TEMP2NET
 Editblk FF
 Base F
 Config F:B Y:F X: Q: RES: SET: CLK:
-Equate F = ''' + equate('FF') + '''
+Equate F = ''' + equate(clbs['FF']) + '''
 Endblk
 Nameblk P51 P51IN
 Editblk P51
@@ -762,7 +795,7 @@ Nameblk DF P53NET
 Editblk DF
 Base F
 Config F:C Y:F X: Q: RES: SET: CLK:
-Equate F = ''' + equate('DF') + '''
+Equate F = ''' + equate(clbs['DF']) + '''
 Endblk
 Nameblk P53 P53OUT
 Editblk P53
@@ -773,13 +806,13 @@ Nameblk DE P53TEMP1NET
 Editblk DE
 Base F
 Config F:D Y:F X: Q: RES: SET: CLK:
-Equate F = ''' + equate('DE') + '''
+Equate F = ''' + equate(clbs['DE']) + '''
 Endblk
 Nameblk EF P53TEMP2NET
 Editblk EF
 Base F
 Config F:C X:F Y: Q: RES: SET: CLK:
-Equate F = ''' + equate('EF') + '''
+Equate F = ''' + equate(clbs['EF']) + '''
 Endblk
 Nameblk P54 P54IN
 Editblk P54
@@ -790,7 +823,7 @@ Nameblk CG P55NET
 Editblk CG
 Base F
 Config F:C Y:F X: Q: RES: SET: CLK:
-Equate F = ''' + equate('CG') + '''
+Equate F = ''' + equate(clbs['CG']) + '''
 Endblk
 Nameblk P55 P55OUT
 Editblk P55
@@ -801,13 +834,13 @@ Nameblk EG P55TEMP1NET
 Editblk EG
 Base F
 Config F:A X:F Y: Q: RES: SET: CLK:
-Equate F = ''' + equate('EG') + '''
+Equate F = ''' + equate(clbs['EG']) + '''
 Endblk
 Nameblk DG P55TEMP2NET
 Editblk DG
 Base F
 Config F:C X:F Y: Q: RES: SET: CLK:
-Equate F = ''' + equate('DG') + '''
+Equate F = ''' + equate(clbs['DG']) + '''
 Endblk
 Nameblk P56 P56IN
 Editblk P56
@@ -818,7 +851,7 @@ Nameblk BH P57NET
 Editblk BH
 Base F
 Config F:C X:F Y: Q: RES: SET: CLK:
-Equate F = ''' + equate('BH') + '''
+Equate F = ''' + equate(clbs['BH']) + '''
 Endblk
 Nameblk P57 P57OUT
 Editblk P57
@@ -829,13 +862,13 @@ Nameblk DH P57TEMP1NET
 Editblk DH
 Base F
 Config F:A X:F Y: Q: RES: SET: CLK:
-Equate F = ''' + equate('DH') + '''
+Equate F = ''' + equate(clbs['DH']) + '''
 Endblk
 Nameblk CH P57TEMP2NET
 Editblk CH
 Base F
 Config F:C X:F Y: Q: RES: SET: CLK:
-Equate F = ''' + equate('CH') + '''
+Equate F = ''' + equate(clbs['CH']) + '''
 Endblk
 Nameblk P58 P58IN
 Editblk P58
@@ -846,7 +879,7 @@ Nameblk EE P59NET
 Editblk EE
 Base F
 Config F:C X:F Y: Q: RES: SET: CLK:
-Equate F = ''' + equate('EE') + '''
+Equate F = ''' + equate(clbs['EE']) + '''
 Endblk
 Nameblk P59 P59OUT
 Editblk P59
@@ -857,13 +890,13 @@ Nameblk ED P59TEMP1NET
 Editblk ED
 Base F
 Config F:D X:F Y: Q: RES: SET: CLK:
-Equate F = ''' + equate('ED') + '''
+Equate F = ''' + equate(clbs['ED']) + '''
 Endblk
 Nameblk DD P59TEMP2NET
 Editblk DD
 Base F
 Config F:C Y:F X: Q: RES: SET: CLK:
-Equate F = ''' + equate('DD') + '''
+Equate F = ''' + equate(clbs['DD']) + '''
 Endblk
 Nameblk P61 P61IN
 Editblk P61
@@ -874,7 +907,7 @@ Nameblk AG P62NET
 Editblk AG
 Base F
 Config F:C Y:F X: Q: RES: SET: CLK:
-Equate F = ''' + equate('AG') + '''
+Equate F = ''' + equate(clbs['AG']) + '''
 Endblk
 Nameblk P62 P62OUT
 Editblk P62
@@ -885,13 +918,13 @@ Nameblk AH P62TEMP1NET
 Editblk AH
 Base F
 Config F:A X:F Y: Q: RES: SET: CLK:
-Equate F = ''' + equate('AH') + '''
+Equate F = ''' + equate(clbs['AH']) + '''
 Endblk
 Nameblk BG P62TEMP2NET
 Editblk BG
 Base F
 Config F:A X:F Y: Q: RES: SET: CLK:
-Equate F = ''' + equate('BG') + '''
+Equate F = ''' + equate(clbs['BG']) + '''
 Endblk
 Nameblk P63 P63IN
 Editblk P63
@@ -902,7 +935,7 @@ Nameblk AF P64NET
 Editblk AF
 Base F
 Config F:C Y:F X: Q: RES: SET: CLK:
-Equate F = ''' + equate('AF') + '''
+Equate F = ''' + equate(clbs['AF']) + '''
 Endblk
 Nameblk P64 P64OUT
 Editblk P64
@@ -913,13 +946,13 @@ Nameblk CF P64TEMP1NET
 Editblk CF
 Base F
 Config F:A X:F Y: Q: RES: SET: CLK:
-Equate F = ''' + equate('CF') + '''
+Equate F = ''' + equate(clbs['CF']) + '''
 Endblk
 Nameblk BF P64TEMP2NET
 Editblk BF
 Base F
 Config F:C X:F Y: Q: RES: SET: CLK:
-Equate F = ''' + equate('BF') + '''
+Equate F = ''' + equate(clbs['BF']) + '''
 Endblk
 Nameblk P65 P65IN
 Editblk P65
@@ -930,7 +963,7 @@ Nameblk AE P66NET
 Editblk AE
 Base F
 Config F:C Y:F X: Q: RES: SET: CLK:
-Equate F = ''' + equate('AE') + '''
+Equate F = ''' + equate(clbs['AE']) + '''
 Endblk
 Nameblk P66 P66OUT
 Editblk P66
@@ -941,13 +974,13 @@ Nameblk CE P66TEMP1NET
 Editblk CE
 Base F
 Config F:A X:F Y: Q: RES: SET: CLK:
-Equate F = ''' + equate('CE') + '''
+Equate F = ''' + equate(clbs['CE']) + '''
 Endblk
 Nameblk BE P66TEMP2NET
 Editblk BE
 Base F
 Config F:C X:F Y: Q: RES: SET: CLK:
-Equate F = ''' + equate('BE') + '''
+Equate F = ''' + equate(clbs['BE']) + '''
 Endblk
 '''
     return out

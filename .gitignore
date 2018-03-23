@@ -12,4 +12,5 @@
 *.RPT
 *.BITS
 out
+specimen_*
 
