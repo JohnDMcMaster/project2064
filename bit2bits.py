@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 '''
 Inspired by the .bits format from project x-ray
 Unlike 7 series though, there are a lot of 1's in unused logic

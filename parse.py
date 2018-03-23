@@ -1,6 +1,7 @@
+#!/usr/bin/env python
+
 from xc2k import parser
 from xc2k import container
-
 
 def run(f, format):
     p = parser.Parser(container.getbits(f, format))

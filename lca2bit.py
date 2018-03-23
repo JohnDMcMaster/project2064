@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from xc2k import xact
 import os
 

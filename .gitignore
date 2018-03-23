@@ -1,7 +1,5 @@
 *.LCA
-*.lca
 *.BIT
-*.log
 *.LOG
 *.LL
 *.MBO
@@ -12,5 +10,6 @@
 *.PGF
 *.SCP
 *.RPT
-*.xnf
+*.BITS
+out
 
