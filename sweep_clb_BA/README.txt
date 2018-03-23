@@ -1,3 +1,5 @@
+Writes all permutations of the LUT in "Editblk BA"
+
 ; SOP form
 ; A B C D  O
 

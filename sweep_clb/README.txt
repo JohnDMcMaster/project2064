@@ -1,3 +1,5 @@
+Sweeps a bunch of different CLB configurations
+
 ; SOP form
 ; A B C D  O
 

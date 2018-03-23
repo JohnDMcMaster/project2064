@@ -1,6 +1,7 @@
 import subprocess
 import os
 import sys
+from sweep_lca import *
 
 def gen_clb_names():
     # "The format for CLB locations is two letters. The first letter indicates the row, the second letter indicates the column
@@ -46,8 +47,6 @@ def func(clb):
 
 def equate(which):
     return func(clbs[which])
-
-from sweep_lca import *
 
 def make(export_to):
     print 'Cleaning old output...'
