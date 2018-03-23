@@ -104,14 +104,20 @@ class Parser(object):
 
     def frame(self):
         preamble = self.expect(0b0, 1, 'frame preamble')
-        payload = self.bits.read(71)
+        payload = self.bits.read(self.frame_bits)
         postamble = self.expect(0b111, 3, 'frame postamble')
         return {'preamble': preamble, 'payload': payload, 'postamble': postamble}
 
-    def frames(self):
+    def frames_raw(self):
         ret = []
         for _framei in xrange(self.nframes):
             ret.append(self.frame())
+        return ret
+
+    def frames(self):
+        self.header()
+        ret = self.frames_raw()
+        self.footer()
         return ret
 
     def footer(self):

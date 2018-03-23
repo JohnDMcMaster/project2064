@@ -1,23 +1,22 @@
+'''
+Create a .bits file, a text equivilent representation of the bitstream
+Inspired by the .bits format from project x-ray
+
+Unlike 7 series though, there are a lot of 1's in unused logic
+'''
+
 from xc2k import parser
 from xc2k import container
-
 
 def run(f, format):
     p = parser.Parser(container.getbits(f, format))
 
-    header = p.header()
-
-    print 'header'
-    print '  pad1: %d bytes (min: 4)' % len(header['pad1'])
-    print '  preamble: %d' % header['preamble']
-    print '  length: %d' % header['length']
-    print '  pad2: %d bytes (min: 4)' % len(header['pad2'])
-
-    for frame in p.frames_raw():
-        #print frame
-        print 'frame: %s' % frame['payload']
-    footer = p.footer()
-    print 'footer: %d bytes (min: 4)' % len(footer['postamble'])
+    for framei, frame in enumerate(p.frames()):
+        for biti, bit in enumerate(frame['payload']):
+            # self.nframes =      {'xc2018': 196, 'xc2064': 160}[dev]
+            # self.frame_bits =   {'xc2018': 87,  'xc2064': 71}[dev]
+            if bit:
+                print '%02x_%02x' % (framei, biti)
 
 def main():
     import argparse
