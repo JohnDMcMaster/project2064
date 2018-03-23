@@ -82,28 +82,13 @@ def revnib(n):
 def munge(n):
     return (revbits4(n & 0xF) << 4) | revbits4((n >> 4) & 0xF)
 
-def getbits(f):
-    if 0:
-        return bitstring.ConstBitStream(bytes=f.read())
-    if 1:
-        buff = f.read()
-        buff = buff[0x76:]
-        return bitstring.ConstBitStream(bytes=buff)
-    if 0:
-        buff = bytearray()
-        for b in f.read():
-            # Reverse bits, swap nibbles
-            buff += chr(munge(ord(b)))
-        return bitstring.ConstBitStream(bytes=buff)
-
 class Parser(object):
-    def __init__(self, f, dev='xc2064'):
-        self.f = f
+    def __init__(self, bits, dev='xc2064'):
         self.dev = dev
         self.nframes =      {'xc2018': 196, 'xc2064': 160}[dev]
         self.frame_bits =   {'xc2018': 87,  'xc2064': 71}[dev]
         #self.bits = bitstring.ConstBitStream(self.f.read())
-        self.bits = getbits(f)
+        self.bits = bits
         self.cfglen = None
 
     def expect(self, want, nbits, msg='expect'):
@@ -148,9 +133,33 @@ class Parser(object):
         postamble = self.expect_run(1, 4, 'postamble')
         return {'postamble': postamble}
 
-def run(f):
-    p = Parser(f)
+def getbits_bin(f):
+    return bitstring.ConstBitStream(bytes=f.read())
+
+def getbits_bit(f):
+    # bit w/ header
+    buff = f.read()
+    buff = buff[0x76:]
+    return bitstring.ConstBitStream(bytes=buff)
+
+def getbits_rom(f):
+    # random rom file they gave me
+    buff = bytearray()
+    for b in f.read():
+        # Reverse bits, swap nibbles
+        buff += chr(munge(ord(b)))
+    return bitstring.ConstBitStream(bytes=buff)
+
+def run(f, format):
+    bits = {
+        'bin': getbits_bin,
+        'bit': getbits_bit,
+        'rom': getbits_rom,
+        }[format](f)
+    p = Parser(bits)
+
     header = p.header()
+
     print 'header'
     print '  pad1: %d bytes (min: 4)' % len(header['pad1'])
     print '  preamble: %d' % header['preamble']
@@ -172,9 +181,10 @@ def main():
     )
 
     parser.add_argument('--verbose', type=int, help='')
+    parser.add_argument('--format', default='bit', help='One of: bin, bit, rom')
     parser.add_argument('fin', help='Input file')
     args = parser.parse_args()
-    run(open(args.fin, 'r'))
+    run(open(args.fin, 'r'), format=args.format)
 
 if __name__ == '__main__':
     main()

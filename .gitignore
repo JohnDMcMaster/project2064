@@ -1,3 +1,16 @@
 *.LCA
 *.lca
+*.BIT
+*.log
+*.LOG
+*.LL
+*.MBO
+*.MSK
+*.RBT
+*.CRF
+*.MAP
+*.PGF
+*.SCP
+*.RPT
+*.xnf
 
