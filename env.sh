@@ -3,6 +3,8 @@ export P2064_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 export XACT_DIR='/opt/XACT'
 export PYTHONPATH=$P2064_DIR:$PYTHONPATH
 export P2064_GENHEADER=$P2064_DIR/utils/genheader.sh
+# You must have this in your path, ie from prjxray
+export P2064_SEGMATCH=segmatch
 
 P2064_PARSE=$P2064_DIR/parse.py
 alias parse=$P2064_PARSE

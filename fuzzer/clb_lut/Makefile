@@ -2,14 +2,15 @@ N := 1
 SPECIMENS := $(addprefix specimen_,$(shell seq -f '%03.0f' $(N)))
 SPECIMENS_OK := $(addsuffix /OK,$(SPECIMENS))
 
-all: $(SPECIMENS_OK)
-	
+all: database
+
 database: $(SPECIMENS_OK)
-	#${XRAY_SEGMATCH} -o seg_clblx.segbits $(addsuffix /segdata_clbl[lm]_[lr].txt,$(SPECIMENS))
+	${P2064_SEGMATCH} -o lut.segbits specimen_*/design.segd
+	#${P2064_SEGMATCH} -o seg_clblx.segbits $(addsuffix /segdata_clbl[lm]_[lr].txt,$(SPECIMENS))
 	echo
 
 pushdb:
-	${XRAY_MERGEDB} clbll_l seg_clblx.segbits
+	${P2064_MERGEDB} clbll_l seg_clblx.segbits
 
 $(SPECIMENS_OK):
 	bash generate.sh $(subst /OK,,$@)

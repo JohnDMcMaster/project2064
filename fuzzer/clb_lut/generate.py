@@ -7,7 +7,7 @@ def run():
     # All CLBs set to random values
     # 4LUT => 16 possible values => 16 bit config
     clbs = {}
-    metaf = open("design.txt", 'w')
+    metaf = open("design.csv", 'w')
     metaf.write('clb,val\n')
     for clb in gen_clbs():
         # 0000 is treated special, omit for now

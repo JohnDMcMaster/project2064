@@ -26,7 +26,7 @@ D:\MAKEBITS -V -O C:\DESIGN.BIT C:\DESIGN.LCA
     batch_fn = os.path.join(lca_dir, 'RUN.BAT')
     try:
         open(batch_fn, 'w').write(batch)
-        subprocess.check_call('SDL_VIDEODRIVER=dummy dosbox %s -c "MOUNT D: %s" -exit' % (batch_fn, XACT_DIR), shell=True)
+        subprocess.check_call('SDL_VIDEODRIVER=dummy dosbox %s -c "MOUNT D: %s" -exit >/dev/null' % (batch_fn, XACT_DIR), shell=True)
     finally:
         if os.path.exists(batch_fn):
             os.unlink(batch_fn)

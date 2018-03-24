@@ -1,24 +1,9 @@
 '''
 Given CLB_NM
-N => frame number
-M => frame bit offset
-is the first row or column? actually not sure
+N row => frame bit offset
+M col => frame number
 '''
-lut_r2frame = {
-    'A': 0x8b,
-    'B': 0x79,
-    'C': 0x67,
-    # +
-    'D': 0x53,
-    'E': 0x41,
-    'F': 0x2f,
-    # +
-    'G': 0x1b,
-    'H': 0x09,
-    }
-LUT_NFRAMES = 0x12
-
-lut_c2off = {
+lut_r2off = {
     'A': 0x3e,
     'B': 0x36,
     'C': 0x2e,
@@ -33,6 +18,20 @@ lut_c2off = {
 # Potential vs observed
 # LUT_NOFF = 0x08
 LUT_NOFF = 0x02
+
+lut_c2frame = {
+    'A': 0x8b,
+    'B': 0x79,
+    'C': 0x67,
+    # +
+    'D': 0x53,
+    'E': 0x41,
+    'F': 0x2f,
+    # +
+    'G': 0x1b,
+    'H': 0x09,
+    }
+LUT_NFRAMES = 0x12
 
 def load_bits(fin):
     ret = set()
@@ -68,8 +67,8 @@ def run(bitf, designf, fout):
             tag CLB.SLICE_X0.CLKINV 0
             '''
             fout.write('seg %02X%02X\n' % (rowi, coli))
-            base_frame = lut_r2frame[row]
-            base_off = lut_c2off[col]
+            base_frame = lut_c2frame[col]
+            base_off = lut_r2off[row]
             for framei in xrange(LUT_NFRAMES):
                 frame = base_frame + framei
                 for offi in xrange(LUT_NOFF):
