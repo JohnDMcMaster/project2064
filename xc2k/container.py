@@ -29,7 +29,7 @@ def getbits_rom(f):
         buff += chr(munge(ord(b)))
     return bitstring.ConstBitStream(bytes=buff)
 
-def getbits(f, format):
+def getbits(f, format='bit'):
     bits = {
         'bin': getbits_bin,
         'bit': getbits_bit,

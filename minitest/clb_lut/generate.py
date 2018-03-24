@@ -1,43 +1,34 @@
 import subprocess
 import os
 
-from xc2k.clb2lca import clb2lca
+from xc2k.clb2lca import clb2lca, gen_clbs
+from xc2k.xact import lca2bit
+from xc2k.bit2bits import bit2bits
 
-def canonical_sop_term(mask):
-    def func(id, set):
-        if set:
-            return id
-        else:
-            return '(~%s)' % id
-    return func('A', mask & 1) + '*' + func('B', mask & 2) + '*' + func('C', mask & 4) + '*' + func('D', mask & 8)
-    
-    
-def make(clb):
-    print 'Cleaning old output...'
-    clbs = '0x%04X' % clb
-    print 'Generating LCA...'
-    lca = clb2lca(clb)
-    print 'Writing LCA...'
-    open('SBAPR.LCA', 'w').write(lca)
-    print 'Synthesizing...'
-    subprocess.check_call("make bits morebits", shell=True)
-    print 'Saving result...'
-    if os.path.exists(clbs):
-        print 'WARNING: removing old dir'
-        subprocess.check_call("rm -rf %s" % clbs, shell=True)
-    subprocess.check_call("./release.sh %s" % clbs, shell=True)
+def make(val):
+    print
+    print
+    print
+    print 'val: 0x%04X' % val
+    dout = 'out_%04X' % val
+    if not os.path.exists(dout):
+        os.mkdir(dout)
 
-print
-print
-print
-print 'Generating references...'
-# 4 variables => 16 bit memory required
-make(0x0000)
-make(0xFFFF)
-for maski in xrange(16):
-    print
-    print
-    print
-    mask = 1 << maski
-    print 'Genearting 0x%04X (%s)' % (mask, func(mask))
-    make(clb)
+    clbs = dict([(k, 0) for k in gen_clbs()])
+    clbs['HH'] = val
+    lca_fn = '%s/DESIGN.LCA' % dout
+    open(lca_fn, 'w').write(clb2lca(clbs))
+
+    bit_fn = '%s/DESIGN.BIT' % dout
+    bits_fn = '%s/DESIGN.BITS' % dout
+    lca2bit(dout)
+    bit2bits(bit_fn, bits_fn)
+
+def run():
+    # 4 variables => 16 bit memory required
+    make(0x0000)
+    make(0xFFFF)
+    for maski in xrange(16):
+        make(1 << maski)
+
+run()

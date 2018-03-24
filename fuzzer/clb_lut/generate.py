@@ -5,13 +5,14 @@ from xc2k.clb2lca import clb2lca, gen_clbs
 
 def run():
     # All CLBs set to random values
-    # 4LUT => u16
-    #clbs = dict([(k, random.randint(0xFFFF)) for k in gen_clbs()])
+    # 4LUT => 16 possible values => 16 bit config
     clbs = {}
     metaf = open("design.txt", 'w')
     metaf.write('clb,val\n')
     for clb in gen_clbs():
-        val = random.randint(0x0000, 0xFFFF)
+        # 0000 is treated special, omit for now
+        # omit FFFF as well just to be safe
+        val = random.randint(0x1, 0xFFFE)
         metaf.write('%s,0x%04X\n' % (clb, val))
         clbs[clb] = val
 

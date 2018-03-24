@@ -5,18 +5,10 @@ Inspired by the .bits format from project x-ray
 Unlike 7 series though, there are a lot of 1's in unused logic
 '''
 
-from xc2k import parser
-from xc2k import container
+from xc2k.bit2bits import bit2bits
 
 def run(fin, fout, format):
-    p = parser.Parser(container.getbits(fin, format))
-
-    for framei, frame in enumerate(p.frames()):
-        for biti, bit in enumerate(frame['payload']):
-            # self.nframes =      {'xc2018': 196, 'xc2064': 160}[dev]
-            # self.frame_bits =   {'xc2018': 87,  'xc2064': 71}[dev]
-            if bit:
-                fout.write('%02x_%02x\n' % (framei, biti))
+    bit2bits(fin, fout, format)
 
 def main():
     import argparse

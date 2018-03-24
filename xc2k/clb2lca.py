@@ -19,7 +19,7 @@ def canonical_sop_term(mask):
 def equate(clb):
     # (~A*(~C*(~B*~D)))+((~A*(~C*(~B*D)))+((~A*(~C*(B*~D)))+((~A*(~C*(B*D)))+((~A*(C*(B*D)))+(A*(C*(B*D)))))))
     # Do non-canonical SOP
-    print 'Generating for CLB 0x%04X' % clb
+    #print 'Generating for CLB 0x%04X' % clb
     if clb == 0:
         # Special case: make a contradiction
         return '((~A)*A)'
@@ -27,7 +27,7 @@ def equate(clb):
     for i in xrange(16):
         mask = 1 << i
         if clb & mask:
-            print 'Masked %d (bit position 0x%04X)' % (i, mask)
+            #print 'Masked %d (bit position 0x%04X)' % (i, mask)
             if len(ret):
                 ret += '+'
             ret += canonical_sop_term(i)
