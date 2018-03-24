@@ -4,7 +4,7 @@ N => frame number
 M => frame bit offset
 is the first row or column? actually not sure
 '''
-lut_n2frame = {
+lut_r2frame = {
     'A': 0x8b,
     'B': 0x79,
     'C': 0x67,
@@ -16,8 +16,9 @@ lut_n2frame = {
     'G': 0x1b,
     'H': 0x09,
     }
-LUT_NFRAMES = 2
-lut_n2off = {
+LUT_NFRAMES = 0x12
+
+lut_c2off = {
     'A': 0x3e,
     'B': 0x36,
     'C': 0x2e,
@@ -29,47 +30,72 @@ lut_n2off = {
     'G': 0x0c,
     'H': 0x04,
     }
+# Potential vs observed
+# LUT_NOFF = 0x08
+LUT_NOFF = 0x02
 
-base_mask = [
-    (0x09, 0x04),
-    (0x09, 0x05),
-    (0x0a, 0x05),
-    (0x0a, 0x04),
-    (0x0b, 0x04),
-    (0x0c, 0x04),
-    (0x0d, 0x04),
-    (0x0e, 0x04),
-    (0x0f, 0x04),
-    (0x10, 0x04),
-    (0x13, 0x04),
-    (0x14, 0x04),
-    (0x15, 0x04),
-    (0x16, 0x04),
-    (0x17, 0x04),
-    (0x18, 0x04),
-    (0x19, 0x04),
-    (0x1a, 0x04),
-    (0x1a, 0x05),
-    ]
+def load_bits(fin):
+    ret = set()
+    for l in fin:
+        # bit_04_0f
+        _prefix, wordi, offi = l.split('_')
+        ret.add((int(wordi, 16), int(offi, 16)))
+    return ret
 
-def run(fin, fout):
-    for row in 'ABCDEFGH':
-        for col in 'ABCDEFGH':
-            
+def load_design(fin):
+    ret = {}
+    fin.readline()
+    for l in fin:
+        k, v = l.split(',')
+        v = int(v, 16)
+        ret[k] = v
+    return ret
+
+def run(bitf, designf, fout):
+    bitdb = load_bits(bitf)
+    designdb = load_design(designf)
+
+    for rowi, row in enumerate('ABCDEFGH'):
+        for coli, col in enumerate('ABCDEFGH'):
+            '''
+            seg 00020500_000
+            bit 00_22
+            ...
+            bit 35_52
+            bit 35_53
+            tag CLB.SLICE_X0.C5FF.ZINI 1
+            tag CLB.SLICE_X0.C5FF.ZRST 0
+            tag CLB.SLICE_X0.CLKINV 0
+            '''
+            fout.write('seg %02X%02X\n' % (rowi, coli))
+            base_frame = lut_r2frame[row]
+            base_off = lut_c2off[col]
+            for framei in xrange(LUT_NFRAMES):
+                frame = base_frame + framei
+                for offi in xrange(LUT_NOFF):
+                    off = base_off + offi  
+                    if (frame, off) in bitdb:
+                        fout.write('bit %02X_%02X\n' % (framei, offi))
+
+            val = designdb[row + col]
+            for maski in xrange(16):
+                expect = 1 ^ int(bool((val & (1 << maski))))
+                fout.write('tag CLB.LUT[%02X] %d\n' % (maski, expect))
 
 def main():
     import argparse
 
     parser = argparse.ArgumentParser(
         description=
-        'Convert a .bits file into a segmatch compatible theorem file'
+        'Find bit locations'
     )
 
     parser.add_argument('--verbose', type=int, help='')
-    parser.add_argument('fin', nargs='?', default='/dev/stdin', help='Input file')
-    parser.add_argument('fout', nargs='?', default='/dev/stdout', help='Output file')
+    parser.add_argument('bits', help='.bits input file')
+    parser.add_argument('design', help='design.txt input file')
+    parser.add_argument('segdata', help='segadata output file')
     args = parser.parse_args()
-    run(open(args.fin, 'r'), open(args.fout, 'w'))
+    run(open(args.bits, 'r'), open(args.design, 'r'), open(args.segdata, 'w'))
 
 if __name__ == '__main__':
     main()

@@ -5,10 +5,10 @@ Inspired by the .bits format from project x-ray
 Unlike 7 series though, there are a lot of 1's in unused logic
 '''
 
-from xc2k.bit2bits import bit2bits
+from xc2k.bit2bits import bit2bitsf
 
 def run(fin, fout, format):
-    bit2bits(fin, fout, format)
+    bit2bitsf(fin, fout, format)
 
 def main():
     import argparse

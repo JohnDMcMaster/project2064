@@ -12,4 +12,4 @@ def bit2bitsf(fin, fout, format='bit'):
             # self.nframes =      {'xc2018': 196, 'xc2064': 160}[dev]
             # self.frame_bits =   {'xc2018': 87,  'xc2064': 71}[dev]
             if bit:
-                fout.write('%02x_%02x\n' % (framei, biti))
+                fout.write('bit_%02x_%02x\n' % (framei, biti))
